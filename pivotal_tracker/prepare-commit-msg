@@ -1,0 +1,34 @@
+#!/usr/bin/php
+<?php
+
+# Git Prepare Commit Message Hook Script
+#
+# Location: <repository>/.git/hooks/prepare-commit-msg
+#
+# This script will automatically add the correct
+# Pivotal Ticket ID to the beginning of each commit message
+# When the branch ID is starts with the Pivotal Message ID.
+# It can be overridden if specified in the message.
+#
+# Example:
+#
+# 1234567_branch_name => '[#1234567] commit message'
+#
+# @author Tamas Kalman <ktamas77@gmail.com>
+
+$messageFile = $argv[1];
+$message = file_get_contents($messageFile);
+
+$messagePivotalPattern = '/^\[#([0-9]{1,16})\]/';
+preg_match($messagePivotalPattern, $message, $matches);
+$messagePivotalId = (isset($matches[1])) ? $matches[1] : null;
+if ($messagePivotalId === null) {
+    $currentBranchName = exec('git rev-parse --abbrev-ref HEAD');
+    $branchPivotalPattern = '/^([0-9]{1,16})_/';
+    preg_match($branchPivotalPattern, $currentBranchName, $matches);
+    $branchPivotalId = (isset($matches[1])) ? $matches[1] : null;
+    if ($branchPivotalId !== null) {
+        $message = sprintf('[#%s] %s', $branchPivotalId, $message);
+        file_put_contents($messageFile, $message);
+    }
+}
