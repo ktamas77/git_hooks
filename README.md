@@ -2,7 +2,7 @@
 
 ## Precommit hook for Pivotal Tracker (PHP / OSX)
 
-pivotal_tracker/pre-commit-msg
+https://github.com/ktamas77/git_hooks/blob/master/pivotal_tracker/prepare-commit-msg
 
 Usage:
 
