@@ -1,0 +1,34 @@
+#!/usr/bin/php
+<?php
+
+# Git Prepare Commit Message Hook Script
+#
+# Location: <repository>/.git/hooks/prepare-commit-msg
+#
+# This script will automatically add the correct
+# JIRA ISSUE ID to the beginning of each commit message
+# When the branch ID is starts with the JIRA ISSUE ID.
+# It can be overridden if specified in the message.
+#
+# Example:
+#
+# jira-123_branch_name => 'JIRA-123 commit message'
+#
+# @author Tamas Kalman <ktamas77@gmail.com>
+
+$messageFile = $argv[1];
+$message = file_get_contents($messageFile);
+
+$messageJiraPattern = '/^([A-Z]{1,32}-[0-9]{1,32})\ /';
+preg_match($messagePivotalPattern, $message, $matches);
+$messageJiraId = (isset($matches[1])) ? $matches[1] : null;
+if ($messageJiraId === null) {
+    $currentBranchName = exec('git rev-parse --abbrev-ref HEAD');
+    $branchJiraPattern = '/^([a-zA-Z]{1,32}-[0-9]{1,32})[-_]?/';
+    preg_match($branchJiraPattern, $currentBranchName, $matches);
+    $branchJiraId = (isset($matches[1])) ? $matches[1] : null;
+    if ($branchJiraId !== null) {
+        $message = sprintf('%s %s', strtoupper($branchJiraId), $message);
+        file_put_contents($messageFile, $message);
+    }
+}
