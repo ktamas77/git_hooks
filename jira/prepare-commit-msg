@@ -1,6 +1,5 @@
 #!/usr/bin/php
 <?php
-
 # Git Prepare Commit Message Hook Script
 #
 # Location: <repository>/.git/hooks/prepare-commit-msg
@@ -18,15 +17,13 @@
 
 $messageFile = $argv[1];
 $message = file_get_contents($messageFile);
-
 $messageJiraPattern = '/^([A-Z]{1,32}-[0-9]{1,32})\ /';
-preg_match($messagePivotalPattern, $message, $matches);
-$messageJiraId = (isset($matches[1])) ? $matches[1] : null;
-if ($messageJiraId === null) {
+if (!preg_match($messageJiraPattern, $message)) {
     $currentBranchName = exec('git rev-parse --abbrev-ref HEAD');
     $branchJiraPattern = '/^([a-zA-Z]{1,32}-[0-9]{1,32})[-_]?/';
     preg_match($branchJiraPattern, $currentBranchName, $matches);
-    $branchJiraId = (isset($matches[1])) ? $matches[1] : null;
+    $envId = getenv("JIRA_TICKET");
+    $branchJiraId = (isset($matches[1])) ? $matches[1] : $envId;
     if ($branchJiraId !== null) {
         $message = sprintf('%s %s', strtoupper($branchJiraId), $message);
         file_put_contents($messageFile, $message);
